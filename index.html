@@ -133,8 +133,17 @@
         </div>
 
         <form id="gaansarForm" class="relative">
+            <!-- ========================================== -->
+            <!-- ⚠️ IMPORTANT CONFIGURATION SECTION ⚠️      -->
+            <!-- ========================================== -->
+            
+            <!-- 1. Paste your Google Apps Script Web App URL below -->
             <input type="hidden" id="scriptURL" value="YOUR_WEBHOOK_URL_HERE">
-            <input type="hidden" id="razorpayKey" value="YOUR_RAZORPAY_KEY_ID">
+            
+            <!-- 2. Paste your Razorpay Key ID (rzp_live_...) below -->
+            <input type="hidden" id="razorpayKey" value="rzp_live_SXlDaiNh5rFXG0">
+            
+            <!-- ========================================== -->
 
             <div class="step-container active" id="step1">
                 <h2 class="text-xl font-semibold mb-6 flex items-center"><i class="fa-regular fa-id-badge text-brand-accent mr-3"></i> User Details</h2>
@@ -453,7 +462,12 @@
         // --- Razorpay & Submission ---
         function openRazorpay() {
             if (!validateStep(1) || !validateStep(2)) { alert("Fill all details first."); return; }
+            
             const rzpKey = document.getElementById('razorpayKey').value;
+            if(rzpKey === "YOUR_RAZORPAY_KEY_ID" || !rzpKey) {
+                alert("Please add your Razorpay Key ID to the HTML code first.");
+                return;
+            }
             
             var options = {
                 "key": rzpKey, "amount": "1000", "currency": "INR", "name": "GAANSAR",
@@ -468,11 +482,16 @@
         function submitWithCoupon() {
             const code = document.getElementById('couponCode').value.trim();
             if (!code) return;
+            // The coupon code is passed exactly like a payment ID!
             executeFinalSubmission(code);
         }
 
         async function executeFinalSubmission(paymentId) {
             const scriptURL = document.getElementById('scriptURL').value;
+            if(scriptURL === "YOUR_WEBHOOK_URL_HERE") {
+                alert("Please add your Google Apps Script URL to the HTML code first.");
+                return;
+            }
             
             // Show Overlay
             document.getElementById('processingOverlay').classList.remove('hidden');
@@ -523,7 +542,19 @@
                 setProcessStatus('proc-final', 'active');
                 
                 const response = await fetchPromise;
-                if (!response.ok) throw new Error("Server error");
+                
+                // --- ERROR HANDLING LOGIC ---
+                if (!response.ok) {
+                    const errText = await response.text();
+                    console.error("Webhook Failed:", errText);
+                    throw new Error("Server error - check console for details.");
+                }
+                
+                const resultJson = await response.json();
+                if(resultJson.result === "error") {
+                     console.error("Google Apps Script Error:", resultJson.error);
+                     throw new Error(resultJson.error);
+                }
                 
                 setProcessStatus('proc-final', 'done');
                 await new Promise(r => setTimeout(r, 500));
@@ -535,7 +566,8 @@
                 document.querySelector('.flex.justify-between.items-center.mb-10').style.display = 'none';
 
             } catch (err) {
-                alert("Upload failed. Make sure your Apps Script Webhook is updated to handle files.");
+                console.error(err);
+                alert("Upload failed: " + err.message + "\n\nMake sure your Webhook is deployed with access set to 'Anyone'.");
                 document.getElementById('processingOverlay').classList.add('hidden');
             }
         }
