@@ -1,0 +1,544 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GAANSAR Analytics | Secure Submission</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+    
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Outfit', 'sans-serif'] },
+                    colors: {
+                        brand: {
+                            dark: '#0A192F',
+                            primary: '#1E3A8A',
+                            accent: '#3B82F6',
+                            success: '#10B981'
+                        }
+                    },
+                    animation: {
+                        'fade-in-up': 'fadeInUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards',
+                        'pulse-glow': 'pulseGlow 2s infinite',
+                        'slide-up': 'slideUp 0.4s ease-out forwards',
+                    },
+                    keyframes: {
+                        fadeInUp: {
+                            '0%': { opacity: '0', transform: 'translateY(30px)' },
+                            '100%': { opacity: '1', transform: 'translateY(0)' },
+                        },
+                        pulseGlow: {
+                            '0%, 100%': { boxShadow: '0 0 15px rgba(59, 130, 246, 0.5)' },
+                            '50%': { boxShadow: '0 0 25px rgba(59, 130, 246, 0.8)' },
+                        },
+                        slideUp: {
+                            '0%': { opacity: '0', transform: 'translateY(100%)' },
+                            '100%': { opacity: '1', transform: 'translateY(0)' },
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            background: #020617;
+            background-image: 
+                radial-gradient(circle at 15% 50%, rgba(30, 58, 138, 0.15) 0%, transparent 50%),
+                radial-gradient(circle at 85% 30%, rgba(59, 130, 246, 0.15) 0%, transparent 50%);
+            min-height: 100vh;
+            color: #fff;
+            overflow-x: hidden;
+        }
+        
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.02);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            box-shadow: 0 30px 60px -15px rgba(0, 0, 0, 0.6);
+        }
+
+        .input-field {
+            background: rgba(0, 0, 0, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: white;
+            transition: all 0.3s ease;
+        }
+
+        .input-field:focus {
+            background: rgba(0, 0, 0, 0.4);
+            border-color: #3B82F6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+            outline: none;
+        }
+
+        .file-drop-zone {
+            border: 2px dashed rgba(255, 255, 255, 0.2);
+            background: rgba(59, 130, 246, 0.05);
+            transition: all 0.3s ease;
+        }
+        .file-drop-zone:hover, .file-drop-zone.dragover {
+            border-color: #3B82F6;
+            background: rgba(59, 130, 246, 0.1);
+        }
+
+        .step-container { display: none; opacity: 0; transform: translateX(20px); transition: all 0.5s ease; }
+        .step-container.active { display: block; opacity: 1; transform: translateX(0); }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: #020617; }
+        ::-webkit-scrollbar-thumb { background: #3B82F6; border-radius: 3px; }
+    </style>
+</head>
+<body class="flex items-center justify-center p-4 sm:p-6 font-sans antialiased relative">
+
+    <div class="w-full max-w-2xl glass-panel rounded-3xl p-6 sm:p-10 relative z-10 animate-fade-in-up my-8">
+        
+        <div class="text-center mb-8">
+            <div class="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-brand-primary to-brand-accent text-white mb-5 shadow-[0_0_30px_rgba(59,130,246,0.4)]">
+                <i class="fa-solid fa-chart-pie text-3xl"></i>
+            </div>
+            <h1 class="text-2xl sm:text-3xl font-bold tracking-tight mb-4 text-transparent bg-clip-text bg-gradient-to-r from-white to-blue-200">GAANSAR - WhatsApp Chat Memoir</h1>
+            
+            <div class="text-left bg-blue-900/20 border border-blue-500/20 rounded-2xl p-4 sm:p-5 mb-4 text-sm text-gray-300">
+                <p class="mb-3"><i class="fa-solid fa-lock text-brand-success mr-2"></i><b>100% PRIVACY GUARANTEED:</b> Data is processed by bots and <b>permanently deleted</b> in 300 seconds.</p>
+                <p class="border-l-2 border-brand-accent pl-3 text-gray-400">Support: Instagram @gaansar | WA: 8838575242</p>
+            </div>
+        </div>
+
+        <div class="flex justify-between items-center mb-10 relative px-2">
+            <div class="absolute left-2 right-2 top-1/2 transform -translate-y-1/2 h-1 bg-gray-800 rounded-full -z-10"></div>
+            <div id="progress-bar" class="absolute left-2 top-1/2 transform -translate-y-1/2 h-1 bg-gradient-to-r from-blue-600 to-brand-accent rounded-full transition-all duration-500 ease-out w-0 -z-10 shadow-[0_0_10px_rgba(59,130,246,0.8)]"></div>
+            
+            <div class="step-indicator flex flex-col items-center" data-step="1">
+                <div class="w-10 h-10 rounded-full bg-brand-accent text-white flex items-center justify-center font-bold shadow-lg ring-4 ring-[#020617] transition-all duration-300">1</div>
+            </div>
+            <div class="step-indicator flex flex-col items-center" data-step="2">
+                <div class="w-10 h-10 rounded-full bg-gray-800 text-gray-400 flex items-center justify-center font-bold ring-4 ring-[#020617] transition-all duration-300">2</div>
+            </div>
+            <div class="step-indicator flex flex-col items-center" data-step="3">
+                <div class="w-10 h-10 rounded-full bg-gray-800 text-gray-400 flex items-center justify-center font-bold ring-4 ring-[#020617] transition-all duration-300">3</div>
+            </div>
+        </div>
+
+        <form id="gaansarForm" class="relative">
+            <input type="hidden" id="scriptURL" value="YOUR_WEBHOOK_URL_HERE">
+            <input type="hidden" id="razorpayKey" value="YOUR_RAZORPAY_KEY_ID">
+
+            <div class="step-container active" id="step1">
+                <h2 class="text-xl font-semibold mb-6 flex items-center"><i class="fa-regular fa-id-badge text-brand-accent mr-3"></i> User Details</h2>
+                <div class="space-y-5">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-300 mb-1">Your Name / உங்கள் பெயர் <span class="text-red-400">*</span></label>
+                        <input type="text" id="name" required class="input-field w-full rounded-xl py-3 px-4 text-sm">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-300 mb-1">WhatsApp Number <span class="text-red-400">*</span></label>
+                        <input type="tel" id="mobile" required class="input-field w-full rounded-xl py-3 px-4 text-sm">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-300 mb-1">Email Address <span class="text-red-400">*</span></label>
+                        <input type="email" id="email" required class="input-field w-full rounded-xl py-3 px-4 text-sm">
+                    </div>
+                </div>
+                <div class="mt-8 flex justify-end">
+                    <button type="button" onclick="nextStep(2)" class="bg-brand-accent hover:bg-blue-400 text-white font-semibold py-3 px-8 rounded-xl transition-all shadow-[0_0_20px_rgba(59,130,246,0.3)]">Next <i class="fa-solid fa-arrow-right ml-2"></i></button>
+                </div>
+            </div>
+
+            <div class="step-container" id="step2">
+                <h2 class="text-xl font-semibold mb-6 flex items-center"><i class="fa-solid fa-cloud-arrow-up text-brand-accent mr-3"></i> Upload Data</h2>
+                
+                <div class="space-y-6">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-200 mb-2">WhatsApp Chat File (.txt or .zip) <span class="text-red-400">*</span></label>
+                        <p class="text-xs text-gray-400 mb-3">Export your chat "WITHOUT MEDIA" and select the file here.</p>
+                        
+                        <div class="file-drop-zone rounded-xl p-6 text-center cursor-pointer relative overflow-hidden" onclick="document.getElementById('chatFileInput').click()">
+                            <input type="file" id="chatFileInput" accept=".txt,.zip" class="hidden" onchange="handleChatFile(event)">
+                            <div id="chatFileUI">
+                                <i class="fa-solid fa-file-lines text-3xl text-brand-accent mb-2"></i>
+                                <p class="text-sm font-medium text-gray-300">Click to browse or drag file here</p>
+                            </div>
+                            <div id="chatFileSuccess" class="hidden flex flex-col items-center">
+                                <i class="fa-solid fa-circle-check text-3xl text-brand-success mb-2"></i>
+                                <p id="chatFileNameDisplay" class="text-sm font-medium text-white truncate w-full px-4"></p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-200 mb-2">Custom Background Image <span class="text-gray-500 font-normal">(Optional)</span></label>
+                        <p class="text-xs text-gray-400 mb-3">Select an image to be printed on the A4 background.</p>
+                        
+                        <div class="file-drop-zone rounded-xl p-6 text-center cursor-pointer relative overflow-hidden" onclick="document.getElementById('bgFileInput').click()">
+                            <input type="file" id="bgFileInput" accept="image/*" class="hidden" onchange="handleBgFile(event)">
+                            <div id="bgFileUI">
+                                <i class="fa-regular fa-image text-3xl text-gray-400 mb-2"></i>
+                                <p class="text-sm font-medium text-gray-300">Upload Background Image</p>
+                            </div>
+                            <div id="bgFileSuccess" class="hidden flex flex-col items-center">
+                                <img id="bgThumbnail" class="w-20 h-auto rounded shadow-lg border border-gray-600 mb-2">
+                                <p class="text-xs text-brand-success font-medium"><i class="fa-solid fa-crop-simple mr-1"></i> Cropped to A4</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mt-8 flex justify-between">
+                    <button type="button" onclick="prevStep(1)" class="text-gray-400 hover:text-white font-medium py-3 px-4"><i class="fa-solid fa-arrow-left mr-2"></i> Back</button>
+                    <button type="button" onclick="nextStep(3)" class="bg-brand-accent hover:bg-blue-400 text-white font-semibold py-3 px-8 rounded-xl transition-all shadow-[0_0_20px_rgba(59,130,246,0.3)]">Next <i class="fa-solid fa-arrow-right ml-2"></i></button>
+                </div>
+            </div>
+
+            <div class="step-container" id="step3">
+                <div class="flex justify-between items-start mb-6">
+                    <h2 class="text-xl font-semibold flex items-center"><i class="fa-solid fa-shield-check text-brand-accent mr-3"></i> Secure Payment</h2>
+                    <button type="button" onclick="toggleCoupon()" class="text-xs text-brand-accent hover:text-white bg-blue-900/30 px-3 py-1.5 rounded-full border border-blue-500/30">
+                        <i class="fa-solid fa-ticket mr-1"></i> Coupon?
+                    </button>
+                </div>
+                
+                <div id="paymentSection" class="text-center py-8 border border-gray-700/50 bg-gray-800/20 rounded-3xl relative overflow-hidden backdrop-blur-md">
+                    <p class="text-sm text-gray-400 mb-1">Total Amount Payable</p>
+                    <p class="text-6xl font-bold text-white mb-8">₹10<span class="text-xl text-gray-500 font-normal">.00</span></p>
+                    
+                    <button type="button" onclick="openRazorpay()" class="bg-gradient-to-r from-brand-primary to-brand-accent hover:from-blue-600 hover:to-blue-400 text-white font-bold py-4 px-10 rounded-2xl text-lg transition-all transform hover:scale-105 shadow-[0_0_25px_rgba(59,130,246,0.5)] w-4/5 mx-auto">
+                        <i class="fa-solid fa-lock mr-2"></i> Pay ₹10 Securely
+                    </button>
+                </div>
+
+                <div id="couponSection" class="hidden mt-4 p-5 border border-brand-accent/30 bg-blue-900/10 rounded-2xl">
+                    <div class="flex gap-3">
+                        <input type="text" id="couponCode" placeholder="Enter coupon code" class="input-field w-full rounded-xl py-3 px-4 text-sm font-mono uppercase">
+                        <button type="button" onclick="submitWithCoupon()" class="bg-brand-accent text-white font-semibold py-3 px-6 rounded-xl whitespace-nowrap">Apply</button>
+                    </div>
+                </div>
+
+                <div class="mt-8 pt-6 border-t border-gray-800 flex justify-start">
+                    <button type="button" onclick="prevStep(2)" class="text-gray-400 hover:text-white font-medium py-3 px-4"><i class="fa-solid fa-arrow-left mr-2"></i> Back</button>
+                </div>
+            </div>
+
+            <div class="step-container py-6" id="stepSuccess">
+                <div class="text-center mb-6">
+                    <div class="w-24 h-24 mx-auto bg-brand-success/20 rounded-full flex items-center justify-center mb-6 ring-2 ring-brand-success shadow-[0_0_40px_rgba(16,185,129,0.3)] animate-bounce">
+                        <i class="fa-solid fa-check text-5xl text-brand-success"></i>
+                    </div>
+                    <h2 class="text-2xl font-bold text-white mb-2">Submission Successful!</h2>
+                </div>
+                <div class="space-y-4 text-gray-300 text-sm leading-relaxed bg-gray-800/30 p-6 rounded-2xl border border-gray-700/50">
+                    <p>Your chat file and payment have been securely transmitted to the GAANSAR Node Server.</p>
+                    <p><b>Next Steps:</b> Your Chat Memoir PDF & Analytics Dashboard will be generated and sent to your email shortly. If you don't see it, check your Spam folder.</p>
+                    <p class="pt-4 border-t border-gray-700 text-center"><button type="button" onclick="location.reload()" class="text-brand-accent hover:text-white font-medium">Submit another response</button></p>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <div id="cropperModal" class="fixed inset-0 z-50 hidden bg-[#020617]/95 backdrop-blur-md flex items-center justify-center p-4">
+        <div class="bg-gray-900 border border-gray-700 rounded-3xl p-6 w-full max-w-2xl animate-slide-up shadow-2xl">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-white font-semibold text-lg"><i class="fa-solid fa-crop-simple text-brand-accent mr-2"></i> Crop Background (A4 Format)</h3>
+                <button onclick="closeCropper()" class="text-gray-400 hover:text-white"><i class="fa-solid fa-xmark text-xl"></i></button>
+            </div>
+            <div class="w-full h-[60vh] bg-black rounded-xl overflow-hidden mb-6 border border-gray-800">
+                <img id="imageToCrop" src="" class="max-w-full">
+            </div>
+            <div class="flex justify-end gap-3">
+                <button onclick="closeCropper()" class="px-6 py-3 rounded-xl font-medium text-gray-300 hover:bg-gray-800 transition">Cancel</button>
+                <button onclick="applyCrop()" class="px-8 py-3 rounded-xl font-bold text-white bg-brand-accent hover:bg-blue-500 shadow-[0_0_15px_rgba(59,130,246,0.4)] transition">Crop & Apply</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="processingOverlay" class="fixed inset-0 z-[100] hidden bg-[#020617]/95 backdrop-blur-lg flex flex-col items-center justify-center">
+        <div class="w-20 h-20 border-4 border-gray-800 border-t-brand-accent rounded-full animate-spin mb-8"></div>
+        <h2 class="text-2xl font-bold text-white mb-8 tracking-wide">Processing Request</h2>
+        
+        <div class="space-y-5 w-72 text-sm font-medium">
+            <div id="proc-payment" class="flex items-center text-gray-500 transition-colors duration-500">
+                <i id="proc-payment-spin" class="fa-solid fa-circle-notch animate-spin w-6 text-brand-accent hidden"></i>
+                <i id="proc-payment-check" class="fa-solid fa-circle-check w-6 text-brand-success hidden"></i>
+                <span id="proc-payment-text">1. Verifying Payment...</span>
+            </div>
+            <div id="proc-chat" class="flex items-center text-gray-500 transition-colors duration-500">
+                <i id="proc-chat-spin" class="fa-solid fa-circle-notch animate-spin w-6 text-brand-accent hidden"></i>
+                <i id="proc-chat-check" class="fa-solid fa-circle-check w-6 text-brand-success hidden"></i>
+                <span id="proc-chat-text">2. Uploading Chat Data...</span>
+            </div>
+            <div id="proc-bg" class="flex items-center text-gray-500 transition-colors duration-500 hidden">
+                <i id="proc-bg-spin" class="fa-solid fa-circle-notch animate-spin w-6 text-brand-accent hidden"></i>
+                <i id="proc-bg-check" class="fa-solid fa-circle-check w-6 text-brand-success hidden"></i>
+                <span id="proc-bg-text">3. Uploading Background...</span>
+            </div>
+            <div id="proc-final" class="flex items-center text-gray-500 transition-colors duration-500">
+                <i id="proc-final-spin" class="fa-solid fa-circle-notch animate-spin w-6 text-brand-accent hidden"></i>
+                <i id="proc-final-check" class="fa-solid fa-circle-check w-6 text-brand-success hidden"></i>
+                <span id="proc-final-text">4. Finalizing Submission...</span>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- State Variables ---
+        let currentStep = 1;
+        let chatFileBase64 = null;
+        let chatFileName = null;
+        let chatFileMime = null;
+        let bgFileBase64 = null;
+        let cropperInstance = null;
+
+        // --- File Handling & Base64 Conversion ---
+        function fileToBase64(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.readAsDataURL(file);
+                reader.onload = () => resolve(reader.result.split(',')[1]); // remove prefix
+                reader.onerror = error => reject(error);
+            });
+        }
+
+        async function handleChatFile(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            
+            chatFileName = file.name;
+            chatFileMime = file.type || 'text/plain'; // default fallback
+            document.getElementById('chatFileNameDisplay').innerText = chatFileName;
+            document.getElementById('chatFileUI').classList.add('hidden');
+            document.getElementById('chatFileSuccess').classList.remove('hidden');
+            
+            // Start conversion quietly in background
+            chatFileBase64 = await fileToBase64(file);
+        }
+
+        function handleBgFile(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                document.getElementById('imageToCrop').src = e.target.result;
+                document.getElementById('cropperModal').classList.remove('hidden');
+                
+                if (cropperInstance) cropperInstance.destroy();
+                
+                cropperInstance = new Cropper(document.getElementById('imageToCrop'), {
+                    aspectRatio: 1 / 1.414, // A4 ratio
+                    viewMode: 1,
+                    autoCropArea: 0.9,
+                    background: false
+                });
+            };
+            reader.readAsDataURL(file);
+            event.target.value = ''; // reset
+        }
+
+        function closeCropper() {
+            document.getElementById('cropperModal').classList.add('hidden');
+            if (cropperInstance) { cropperInstance.destroy(); cropperInstance = null; }
+        }
+
+        function applyCrop() {
+            if (!cropperInstance) return;
+            // Get high quality cropped image
+            const canvas = cropperInstance.getCroppedCanvas({ width: 1000 }); 
+            const dataUrl = canvas.toDataURL('image/jpeg', 0.8);
+            
+            bgFileBase64 = dataUrl.split(',')[1];
+            
+            document.getElementById('bgThumbnail').src = dataUrl;
+            document.getElementById('bgFileUI').classList.add('hidden');
+            document.getElementById('bgFileSuccess').classList.remove('hidden');
+            
+            // Show BG step in processing UI
+            document.getElementById('proc-bg').classList.remove('hidden');
+            
+            closeCropper();
+        }
+
+        // --- UI Navigation ---
+        function updateProgress(step) {
+            const progress = ((step - 1) / 2) * 100;
+            document.getElementById('progress-bar').style.width = `${progress}%`;
+
+            document.querySelectorAll('.step-indicator').forEach((indicator) => {
+                const stepNum = parseInt(indicator.getAttribute('data-step'));
+                const div = indicator.querySelector('div');
+                if (stepNum < step) {
+                    div.className = 'w-10 h-10 rounded-full bg-brand-success text-white flex items-center justify-center font-bold ring-4 ring-[#020617] transition-all';
+                    div.innerHTML = '<i class="fa-solid fa-check"></i>';
+                } else if (stepNum === step) {
+                    div.className = 'w-10 h-10 rounded-full bg-brand-accent text-white flex items-center justify-center font-bold shadow-lg ring-4 ring-[#020617] animate-pulse-glow transition-all';
+                    div.innerHTML = stepNum;
+                } else {
+                    div.className = 'w-10 h-10 rounded-full bg-gray-800 text-gray-400 flex items-center justify-center font-bold ring-4 ring-[#020617] transition-all';
+                    div.innerHTML = stepNum;
+                }
+            });
+        }
+
+        function validateStep(step) {
+            if (step === 1) {
+                const n = document.getElementById('name'); const m = document.getElementById('mobile'); const e = document.getElementById('email');
+                let ok = true;
+                if (!n.value) { n.classList.add('border-red-500'); ok = false; }
+                if (!m.value) { m.classList.add('border-red-500'); ok = false; }
+                if (!e.value || !e.value.includes('@')) { e.classList.add('border-red-500'); ok = false; }
+                return ok;
+            }
+            if (step === 2) {
+                if (!chatFileBase64) {
+                    alert("Please select your WhatsApp Chat File (.txt or .zip)");
+                    return false;
+                }
+                return true;
+            }
+            return true;
+        }
+
+        function nextStep(step) {
+            if (!validateStep(currentStep)) return;
+            document.getElementById(`step${currentStep}`).classList.remove('active');
+            currentStep = step;
+            document.getElementById(`step${currentStep}`).classList.add('active');
+            updateProgress(currentStep);
+        }
+
+        function prevStep(step) {
+            document.getElementById(`step${currentStep}`).classList.remove('active');
+            currentStep = step;
+            document.getElementById(`step${currentStep}`).classList.add('active');
+            updateProgress(currentStep);
+        }
+
+        function toggleCoupon() {
+            document.getElementById('couponSection').classList.toggle('hidden');
+        }
+
+        // --- Remove error outlines on type ---
+        document.querySelectorAll('input').forEach(i => i.addEventListener('input', function() { this.classList.remove('border-red-500'); }));
+
+        // --- Overlay Status Helper ---
+        function setProcessStatus(id, state) {
+            const el = document.getElementById(id);
+            const spin = document.getElementById(`${id}-spin`);
+            const check = document.getElementById(`${id}-check`);
+            const text = document.getElementById(`${id}-text`);
+            
+            el.classList.remove('text-gray-500');
+            spin.classList.add('hidden'); check.classList.add('hidden');
+            
+            if (state === 'active') {
+                el.classList.add('text-white');
+                spin.classList.remove('hidden');
+            } else if (state === 'done') {
+                el.classList.add('text-brand-success');
+                check.classList.remove('hidden');
+            }
+        }
+
+        // --- Razorpay & Submission ---
+        function openRazorpay() {
+            if (!validateStep(1) || !validateStep(2)) { alert("Fill all details first."); return; }
+            const rzpKey = document.getElementById('razorpayKey').value;
+            
+            var options = {
+                "key": rzpKey, "amount": "1000", "currency": "INR", "name": "GAANSAR",
+                "handler": function (response) { executeFinalSubmission(response.razorpay_payment_id); },
+                "prefill": { "name": document.getElementById('name').value, "email": document.getElementById('email').value, "contact": document.getElementById('mobile').value },
+                "theme": { "color": "#3B82F6" }
+            };
+            var rzp1 = new Razorpay(options);
+            rzp1.open();
+        }
+
+        function submitWithCoupon() {
+            const code = document.getElementById('couponCode').value.trim();
+            if (!code) return;
+            executeFinalSubmission(code);
+        }
+
+        async function executeFinalSubmission(paymentId) {
+            const scriptURL = document.getElementById('scriptURL').value;
+            
+            // Show Overlay
+            document.getElementById('processingOverlay').classList.remove('hidden');
+            
+            // 1. Payment verify UI
+            setProcessStatus('proc-payment', 'active');
+            await new Promise(r => setTimeout(r, 1000)); // Simulate slight delay
+            setProcessStatus('proc-payment', 'done');
+            
+            // 2. Upload Chat
+            setProcessStatus('proc-chat', 'active');
+            
+            // Construct Payload for GAS
+            const payload = {
+                name: document.getElementById('name').value,
+                email: document.getElementById('email').value,
+                mobile: document.getElementById('mobile').value,
+                paymentId: paymentId,
+                chatFileName: chatFileName,
+                chatFileMime: chatFileMime,
+                chatFileData: chatFileBase64
+            };
+            
+            if (bgFileBase64) {
+                payload.bgFileName = `bg_${Date.now()}.jpg`;
+                payload.bgFileMime = "image/jpeg";
+                payload.bgFileData = bgFileBase64;
+            }
+
+            try {
+                // We don't await the fetch immediately, we want to animate the UI
+                const fetchPromise = fetch(scriptURL, {
+                    method: 'POST',
+                    body: JSON.stringify(payload),
+                    headers: { 'Content-Type': 'text/plain;charset=utf-8' } // GAS handles this better than application/json for CORS
+                });
+
+                // Animate UI while fetch happens
+                await new Promise(r => setTimeout(r, 2000));
+                setProcessStatus('proc-chat', 'done');
+                
+                if (bgFileBase64) {
+                    setProcessStatus('proc-bg', 'active');
+                    await new Promise(r => setTimeout(r, 1500));
+                    setProcessStatus('proc-bg', 'done');
+                }
+                
+                setProcessStatus('proc-final', 'active');
+                
+                const response = await fetchPromise;
+                if (!response.ok) throw new Error("Server error");
+                
+                setProcessStatus('proc-final', 'done');
+                await new Promise(r => setTimeout(r, 500));
+                
+                // Show Success
+                document.getElementById('processingOverlay').classList.add('hidden');
+                document.getElementById('step3').classList.remove('active');
+                document.getElementById('stepSuccess').classList.add('active');
+                document.querySelector('.flex.justify-between.items-center.mb-10').style.display = 'none';
+
+            } catch (err) {
+                alert("Upload failed. Make sure your Apps Script Webhook is updated to handle files.");
+                document.getElementById('processingOverlay').classList.add('hidden');
+            }
+        }
+    </script>
+</body>
+</html>
